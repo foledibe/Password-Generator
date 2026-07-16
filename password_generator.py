@@ -26,6 +26,24 @@ def parse_arguments():
     parser.add_argument("--no-symbols", action="store_false", dest="use_symbols", help="Exclude symbols")
     return parser.parse_args()
 
+def check_strength(password):
+    """Give simple feedback on how strong a password is."""
+    length_score = len(password) >= 12
+    has_upper = any(c.isupper() for c in password)
+    has_lower = any(c.islower() for c in password)
+    has_digit = any(c.isdigit() for c in password)
+    has_symbol = any(c in string.punctuation for c in password)
+
+    score = sum([length_score, has_upper, has_lower, has_digit, has_symbol])
+
+    if score == 5:
+        return "Very Strong"
+    elif score >= 3:
+        return "Strong"
+    elif score >= 2:
+        return "Moderate"
+    else:
+        return "Weak"
 
 if __name__ == "__main__":
     args = parse_arguments()
@@ -35,4 +53,6 @@ if __name__ == "__main__":
         use_digits=args.use_digits,
         use_symbols=args.use_symbols,
     )
+    strength = check_strength(new_password)
     print("Your generated password is:", new_password)
+    print("Strength rating:", strength)
