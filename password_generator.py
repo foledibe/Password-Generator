@@ -3,7 +3,7 @@ import string
 import argparse
 
 
-def generate_password(length=12, use_upper=True, use_digits=True, use_symbols=True):
+def generate_password(length=12, use_upper=True, use_digits=True, use_symbols=True, avoid_ambiguous=False):
     """Generate a random password based on chosen character types."""
     characters = string.ascii_lowercase
     if use_upper:
@@ -13,18 +13,13 @@ def generate_password(length=12, use_upper=True, use_digits=True, use_symbols=Tr
     if use_symbols:
         characters += string.punctuation
 
+    if avoid_ambiguous:
+        ambiguous = "lI1O0"
+        characters = ''.join(c for c in characters if c not in ambiguous)
+
     password = ''.join(random.choice(characters) for _ in range(length))
     return password
 
-
-def parse_arguments():
-    """Read options the user typed in the terminal."""
-    parser = argparse.ArgumentParser(description="Generate a secure random password.")
-    parser.add_argument("-l", "--length", type=int, default=12, help="Password length (default: 12)")
-    parser.add_argument("--no-upper", action="store_false", dest="use_upper", help="Exclude uppercase letters")
-    parser.add_argument("--no-digits", action="store_false", dest="use_digits", help="Exclude digits")
-    parser.add_argument("--no-symbols", action="store_false", dest="use_symbols", help="Exclude symbols")
-    return parser.parse_args()
 
 def check_strength(password):
     """Give simple feedback on how strong a password is."""
@@ -45,6 +40,18 @@ def check_strength(password):
     else:
         return "Weak"
 
+
+def parse_arguments():
+    """Read options the user typed in the terminal."""
+    parser = argparse.ArgumentParser(description="Generate a secure random password.")
+    parser.add_argument("-l", "--length", type=int, default=12, help="Password length (default: 12)")
+    parser.add_argument("--no-upper", action="store_false", dest="use_upper", help="Exclude uppercase letters")
+    parser.add_argument("--no-digits", action="store_false", dest="use_digits", help="Exclude digits")
+    parser.add_argument("--no-symbols", action="store_false", dest="use_symbols", help="Exclude symbols")
+    parser.add_argument("--avoid-ambiguous", action="store_true", help="Avoid confusing characters like l, I, 1, O, 0")
+    return parser.parse_args()
+
+
 if __name__ == "__main__":
     args = parse_arguments()
     new_password = generate_password(
@@ -52,6 +59,7 @@ if __name__ == "__main__":
         use_upper=args.use_upper,
         use_digits=args.use_digits,
         use_symbols=args.use_symbols,
+        avoid_ambiguous=args.avoid_ambiguous,
     )
     strength = check_strength(new_password)
     print("Your generated password is:", new_password)
